@@ -76,15 +76,15 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 	var _lodashLangIsEqual2 = _interopRequireDefault(_lodashLangIsEqual);
 	
-	var _lodashLangClone = __webpack_require__(29);
+	var _lodashLangCloneDeep = __webpack_require__(29);
 	
-	var _lodashLangClone2 = _interopRequireDefault(_lodashLangClone);
+	var _lodashLangCloneDeep2 = _interopRequireDefault(_lodashLangCloneDeep);
 	
-	var _helpersUuid = __webpack_require__(44);
+	var _helpersUuid = __webpack_require__(43);
 	
 	var _helpersUuid2 = _interopRequireDefault(_helpersUuid);
 	
-	var _helpersUcFirst = __webpack_require__(45);
+	var _helpersUcFirst = __webpack_require__(44);
 	
 	var _helpersUcFirst2 = _interopRequireDefault(_helpersUcFirst);
 	
@@ -121,7 +121,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	  },
 	
 	  componentDidMount: function componentDidMount() {
-	    var config = (0, _lodashLangClone2['default'])(this.props.config);
 	    this._init(config);
 	  },
 	
@@ -154,12 +153,16 @@ return /******/ (function(modules) { // webpackBootstrap
 	    });
 	  },
 	
-	  _init: function _init(config, content) {
+	  _init: function _init(configProp, content) {
 	    var _this = this;
 	
 	    if (this._isInit) {
 	      this._remove();
 	    }
+	
+	    // Clone the config prop to prevent modifications by TinyMCE, which
+	    // would cause the react component to be updated incorrectly.
+	    var config = (0, _lodashLangCloneDeep2['default'])(configProp);
 	
 	    // hide the textarea that is me so that no one sees it
 	    (0, _reactDom.findDOMNode)(this).style.hidden = 'hidden';
@@ -1336,15 +1339,13 @@ return /******/ (function(modules) { // webpackBootstrap
 /***/ function(module, exports, __webpack_require__) {
 
 	var baseClone = __webpack_require__(30),
-	    bindCallback = __webpack_require__(27),
-	    isIterateeCall = __webpack_require__(43);
+	    bindCallback = __webpack_require__(27);
 	
 	/**
-	 * Creates a clone of `value`. If `isDeep` is `true` nested objects are cloned,
-	 * otherwise they are assigned by reference. If `customizer` is provided it's
-	 * invoked to produce the cloned values. If `customizer` returns `undefined`
-	 * cloning is handled by the method instead. The `customizer` is bound to
-	 * `thisArg` and invoked with up to three argument; (value [, index|key, object]).
+	 * Creates a deep clone of `value`. If `customizer` is provided it's invoked
+	 * to produce the cloned values. If `customizer` returns `undefined` cloning
+	 * is handled by the method instead. The `customizer` is bound to `thisArg`
+	 * and invoked with up to three argument; (value [, index|key, object]).
 	 *
 	 * **Note:** This method is loosely based on the
 	 * [structured clone algorithm](http://www.w3.org/TR/html5/infrastructure.html#internal-structured-cloning-algorithm).
@@ -1356,11 +1357,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @static
 	 * @memberOf _
 	 * @category Lang
-	 * @param {*} value The value to clone.
-	 * @param {boolean} [isDeep] Specify a deep clone.
+	 * @param {*} value The value to deep clone.
 	 * @param {Function} [customizer] The function to customize cloning values.
 	 * @param {*} [thisArg] The `this` binding of `customizer`.
-	 * @returns {*} Returns the cloned value.
+	 * @returns {*} Returns the deep cloned value.
 	 * @example
 	 *
 	 * var users = [
@@ -1368,18 +1368,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	 *   { 'user': 'fred' }
 	 * ];
 	 *
-	 * var shallow = _.clone(users);
-	 * shallow[0] === users[0];
-	 * // => true
-	 *
-	 * var deep = _.clone(users, true);
+	 * var deep = _.cloneDeep(users);
 	 * deep[0] === users[0];
 	 * // => false
 	 *
 	 * // using a customizer callback
-	 * var el = _.clone(document.body, function(value) {
+	 * var el = _.cloneDeep(document.body, function(value) {
 	 *   if (_.isElement(value)) {
-	 *     return value.cloneNode(false);
+	 *     return value.cloneNode(true);
 	 *   }
 	 * });
 	 *
@@ -1388,23 +1384,15 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * el.nodeName
 	 * // => BODY
 	 * el.childNodes.length;
-	 * // => 0
+	 * // => 20
 	 */
-	function clone(value, isDeep, customizer, thisArg) {
-	  if (isDeep && typeof isDeep != 'boolean' && isIterateeCall(value, isDeep, customizer)) {
-	    isDeep = false;
-	  }
-	  else if (typeof isDeep == 'function') {
-	    thisArg = customizer;
-	    customizer = isDeep;
-	    isDeep = false;
-	  }
+	function cloneDeep(value, customizer, thisArg) {
 	  return typeof customizer == 'function'
-	    ? baseClone(value, isDeep, bindCallback(customizer, thisArg, 3))
-	    : baseClone(value, isDeep);
+	    ? baseClone(value, true, bindCallback(customizer, thisArg, 3))
+	    : baseClone(value, true);
 	}
 	
-	module.exports = clone;
+	module.exports = cloneDeep;
 
 
 /***/ },
@@ -1900,40 +1888,6 @@ return /******/ (function(modules) { // webpackBootstrap
 
 /***/ },
 /* 43 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var isArrayLike = __webpack_require__(17),
-	    isIndex = __webpack_require__(24),
-	    isObject = __webpack_require__(15);
-	
-	/**
-	 * Checks if the provided arguments are from an iteratee call.
-	 *
-	 * @private
-	 * @param {*} value The potential iteratee value argument.
-	 * @param {*} index The potential iteratee index or key argument.
-	 * @param {*} object The potential iteratee object argument.
-	 * @returns {boolean} Returns `true` if the arguments are from an iteratee call, else `false`.
-	 */
-	function isIterateeCall(value, index, object) {
-	  if (!isObject(object)) {
-	    return false;
-	  }
-	  var type = typeof index;
-	  if (type == 'number'
-	      ? (isArrayLike(object) && isIndex(index, object.length))
-	      : (type == 'string' && index in object)) {
-	    var other = object[index];
-	    return value === value ? (value === other) : (other !== other);
-	  }
-	  return false;
-	}
-	
-	module.exports = isIterateeCall;
-
-
-/***/ },
-/* 44 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -1944,7 +1898,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	};
 
 /***/ },
-/* 45 */
+/* 44 */
 /***/ function(module, exports) {
 
 	"use strict";
