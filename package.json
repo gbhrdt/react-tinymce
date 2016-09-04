@@ -2,14 +2,14 @@
   "name": "react-tinymce",
   "version": "0.5.1",
   "description": "React TinyMCE component",
-  "main": "dist/react-tinymce.js",
+  "main": "lib/main.js",
   "scripts": {
     "test": "node_modules/.bin/rackt test --single-run --browsers Firefox",
     "start": "node_modules/.bin/rackt server"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/instructure-react/react-tinymce.git"
+    "url": "https://github.com/gbhrdt/react-tinymce.git"
   },
   "homepage": "https://github.com/instructure-react/react-tinymce",
   "keywords": [
